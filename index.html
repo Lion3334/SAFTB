@@ -9,23 +9,23 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     :root {
-      --bg: #0b1a2e;
-      --panel: #152340;
-      --border: #3d9ab8;
-      --red: #cc3f50;
-      --gold: #c9a03a;
-      --cyan: #4db8d0;
-      --white: #d8e8f4;
+      --bg: #141008;
+      --panel: #1e1a08;
+      --border: #c8a000;
+      --red: #d93050;
+      --gold: #f0c000;
+      --cyan: #ff7820;
+      --white: #f5eed0;
       --green: #3aaa68;
-      --dim: #6b82a8;
-      --team1: #d46b20;
-      --team2: #3d9ab8;
+      --dim: #7a6a40;
+      --team1: #ff7820;
+      --team2: #d93050;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: linear-gradient(170deg, #0e2040 0%, #0b1a2e 45%, #0d1f38 100%);
+      background: linear-gradient(160deg, #1c1608 0%, #141008 50%, #191200 100%);
       background-attachment: fixed;
       color: var(--white);
       font-family: 'Barlow Condensed', sans-serif;
@@ -52,8 +52,8 @@
     .site-title {
       font-family: 'Press Start 2P', monospace;
       font-size: clamp(1.6rem, 6vw, 3.2rem);
-      color: var(--red);
-      text-shadow: 3px 3px 0 rgba(0,0,0,0.6), 0 0 16px rgba(204,63,80,0.5);
+      color: var(--gold);
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.7);
       letter-spacing: 4px;
       margin-bottom: 14px;
       line-height: 1.3;
@@ -69,9 +69,9 @@
 
     .header-divider {
       height: 3px;
-      background: linear-gradient(90deg, transparent, var(--cyan), var(--red), var(--cyan), transparent);
+      background: linear-gradient(90deg, transparent, var(--gold), var(--cyan), var(--gold), transparent);
       margin: 20px 0;
-      box-shadow: 0 0 10px rgba(0,200,255,0.5);
+      box-shadow: none;
     }
 
     /* TABS */
@@ -82,7 +82,7 @@
       border: 2px solid var(--border);
       border-radius: 2px;
       padding: 4px;
-      background: rgba(13,24,68,0.5);
+      background: rgba(30,22,8,0.6);
     }
 
     .tab-btn {
@@ -98,12 +98,12 @@
       transition: all 0.1s;
     }
 
-    .tab-btn:hover { color: var(--cyan); border-color: rgba(0,200,255,0.3); }
+    .tab-btn:hover { color: var(--gold); border-color: rgba(200,160,0,0.3); }
     .tab-btn.active {
       color: var(--bg);
-      background: var(--cyan);
-      border-color: var(--cyan);
-      box-shadow: 0 0 12px rgba(0,200,255,0.6);
+      background: var(--gold);
+      border-color: var(--gold);
+      box-shadow: none;
     }
 
     /* HERO CARDS */
@@ -119,7 +119,7 @@
       border: 2px solid var(--border);
       padding: 16px 10px;
       text-align: center;
-      box-shadow: 0 0 15px rgba(0,200,255,0.2), inset 0 0 20px rgba(0,0,50,0.3);
+      box-shadow: inset 0 0 20px rgba(20,14,0,0.4);
     }
 
     .hero-val {
@@ -151,7 +151,7 @@
       font-size: clamp(0.45rem, 1.3vw, 0.65rem);
       color: var(--gold);
       white-space: nowrap;
-      text-shadow: 0 0 8px rgba(255,215,0,0.5);
+      text-shadow: none;
     }
 
     .section-head-line {
@@ -160,13 +160,8 @@
       background: linear-gradient(90deg, var(--gold), transparent);
     }
 
-    /* PLAYER CARDS */
-    .player-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px;
-      margin-bottom: 40px;
-    }
+    /* LEADERBOARD TABLE */
+    .player-grid { margin-bottom: 40px; }
 
     .player-card {
       background: linear-gradient(160deg, var(--panel) 0%, #0a1035 100%);
@@ -234,7 +229,6 @@
       overflow-x: auto;
       margin-bottom: 40px;
       border: 2px solid var(--border);
-      box-shadow: 0 0 15px rgba(0,200,255,0.2);
     }
 
     .nemesis-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
@@ -251,8 +245,16 @@
       white-space: nowrap;
     }
 
-    .nemesis-table tbody tr { border-bottom: 1px solid rgba(0,200,255,0.15); }
-    .nemesis-table tbody tr:hover { background: rgba(13,24,68,0.8); }
+    .nemesis-table thead th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .nemesis-table thead th.sortable:hover { color: var(--white); }
+    .nemesis-table thead th.sort-active { color: var(--cyan); }
+
+    .nemesis-table tbody tr { border-bottom: 1px solid rgba(200,160,0,0.15); }
+    .nemesis-table tbody tr:hover { background: rgba(30,22,8,0.8); }
     .nemesis-table tbody td { padding: 10px 14px; color: var(--white); }
     .nemesis-table tbody td:first-child {
       font-weight: 900;
@@ -272,7 +274,7 @@
 
     .form-input, .form-select {
       background: var(--panel);
-      border: 2px solid rgba(0,200,255,0.4);
+      border: 2px solid rgba(200,160,0,0.35);
       color: var(--white);
       padding: 10px 12px;
       font-family: 'Barlow Condensed', sans-serif;
@@ -285,10 +287,10 @@
 
     .form-input:focus, .form-select:focus {
       border-color: var(--cyan);
-      box-shadow: 0 0 8px rgba(0,200,255,0.3);
+      box-shadow: none;
     }
 
-    .form-select option { background: #0d1844; }
+    .form-select option { background: #1e1a08; }
 
     .teams-grid {
       display: grid;
@@ -329,7 +331,7 @@
     }
 
     .btn-primary { background: var(--panel); border-color: var(--cyan); color: var(--cyan); }
-    .btn-primary:hover { background: var(--cyan); color: var(--bg); box-shadow: 0 0 12px rgba(0,200,255,0.6); }
+    .btn-primary:hover { background: var(--cyan); color: var(--bg); }
 
     .btn-secondary { background: transparent; border-color: var(--gold); color: var(--gold); }
     .btn-secondary:hover { background: var(--gold); color: var(--bg); }
@@ -340,7 +342,7 @@
     .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
     /* GAME LIST */
-    .game-item { border: 1px solid rgba(0,200,255,0.2); margin-bottom: 8px; }
+    .game-item { border: 1px solid rgba(200,160,0,0.2); margin-bottom: 8px; }
 
     .game-item-header {
       display: flex;
@@ -348,16 +350,16 @@
       align-items: center;
       padding: 10px 14px;
       cursor: pointer;
-      background: rgba(13,24,68,0.4);
+      background: rgba(30,22,8,0.4);
       gap: 8px;
     }
 
-    .game-item-header:hover { background: rgba(13,24,68,0.8); }
+    .game-item-header:hover { background: rgba(30,22,8,0.8); }
 
     .game-item-label { font-size: 0.95rem; font-weight: 800; color: var(--white); flex: 1; }
     .game-toggle { color: var(--cyan); font-size: 0.8rem; flex-shrink: 0; }
 
-    .game-item-body { padding: 16px; border-top: 1px solid rgba(0,200,255,0.2); display: none; }
+    .game-item-body { padding: 16px; border-top: 1px solid rgba(200,160,0,0.2); display: none; }
     .game-item-body.open { display: block; }
 
     /* PLAYERS LIST */
@@ -584,6 +586,8 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allPlayers = [];
 let allGames = [];
+let sortCol = 'wins';
+let sortDir = -1; // -1 = descending, 1 = ascending
 
 // ── TABS ──
 function switchTab(tab) {
@@ -658,9 +662,11 @@ function computeLeaderboard(players, games) {
     const records = pg[p.id] || [];
     const life = agg(records);
     const l7 = agg(records.slice(0, 7));
+    const gp = life.wins + life.losses;
     return {
       name: pidName[p.id],
       wins: life.wins, losses: life.losses,
+      winPct: gp === 0 ? '—' : Math.round(life.wins / gp * 100) + '%',
       scored: life.scored, against: life.against,
       diff: life.scored - life.against,
       last7WL: `${l7.wins}-${l7.losses}`,
@@ -727,51 +733,91 @@ function renderHeroCards() {
   `;
 }
 
+function colorDiff(val) {
+  if (val === '—') return `style="color:var(--dim)"`;
+  const n = parseFloat(val);
+  if (n > 0) return `style="color:var(--green);font-weight:900"`;
+  if (n < 0) return `style="color:var(--red);font-weight:900"`;
+  return `style="color:var(--dim)"`;
+}
+
+function fmtDiff(val) {
+  return val > 0 ? `+${val}` : `${val}`;
+}
+
+function setSort(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = -1; }
+  renderLeaderboard();
+}
+
+function applySortToRows(rows) {
+  return [...rows].sort((a, b) => {
+    if (sortCol === 'name') return sortDir * a.name.localeCompare(b.name);
+    if (sortCol === 'winPct') {
+      const av = a.winPct === '—' ? -1 : parseFloat(a.winPct);
+      const bv = b.winPct === '—' ? -1 : parseFloat(b.winPct);
+      return sortDir * (bv - av);
+    }
+    if (sortCol === 'last7WL') {
+      return sortDir * (parseInt(b.last7WL) - parseInt(a.last7WL));
+    }
+    return sortDir * (b[sortCol] - a[sortCol]);
+  });
+}
+
+function sortTh(col, label) {
+  const active = sortCol === col ? ' sort-active' : '';
+  const arrow = sortCol === col ? (sortDir === -1 ? ' ▼' : ' ▲') : '';
+  return `<th class="sortable${active}" onclick="setSort('${col}')">${label}${arrow}</th>`;
+}
+
 function renderLeaderboard() {
-  const rows = computeLeaderboard(allPlayers, allGames);
+  const base = computeLeaderboard(allPlayers, allGames);
+  const rows = applySortToRows(base);
   const el = document.getElementById('player-grid');
   if (!rows.length) {
     el.innerHTML = '<div class="empty-state">No players yet. Add players in the Admin tab.</div>';
     return;
   }
-  el.innerHTML = rows.map((r, i) => `
-    <div class="player-card">
-      <div class="player-card-header">
-        <span class="player-rank">${RANKS[i] || (i + 1)}</span>
-        <span class="player-name">${r.name}</span>
-      </div>
-      <div class="player-stats">
-        <div class="stat-item">
-          <div class="stat-label">WINS</div>
-          <div class="stat-value pos">${r.wins}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">LOSSES</div>
-          <div class="stat-value neg">${r.losses}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">PTS SCORED</div>
-          <div class="stat-value">${r.scored}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">PTS AGAINST</div>
-          <div class="stat-value">${r.against}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">POINT DIFF</div>
-          <div class="stat-value ${dc(r.diff)}">${r.diff > 0 ? '+' : ''}${r.diff}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">LAST 7</div>
-          <div class="stat-value">${r.last7WL}</div>
-        </div>
-        <div class="stat-item" style="grid-column:span 2">
-          <div class="stat-label">LAST 7 DIFF</div>
-          <div class="stat-value ${dc(r.last7Diff)}">${r.last7Diff > 0 ? '+' : ''}${r.last7Diff}</div>
-        </div>
-      </div>
-    </div>
-  `).join('');
+
+  // Rank is always based on wins/diff default order (base array), not current sort
+  const rankMap = {};
+  base.forEach((r, i) => rankMap[r.name] = RANKS[i] || (i + 1));
+
+  el.innerHTML = `
+    <div style="overflow-x:auto;border:2px solid var(--border)">
+      <table class="nemesis-table">
+        <thead><tr>
+          <th style="text-align:center">#</th>
+          ${sortTh('name', 'PLAYER')}
+          ${sortTh('wins', 'W')}
+          ${sortTh('losses', 'L')}
+          ${sortTh('winPct', 'WIN%')}
+          ${sortTh('diff', 'PTS DIFF')}
+          ${sortTh('scored', 'PTS SCORED')}
+          ${sortTh('against', 'PTS AGAINST')}
+          ${sortTh('last7WL', 'LAST 7')}
+          ${sortTh('last7Diff', 'L7 DIFF')}
+        </tr></thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td style="text-align:center;font-size:1.1rem">${rankMap[r.name]}</td>
+              <td style="font-weight:900;font-size:1.15rem;text-transform:uppercase;color:var(--white)">${r.name}</td>
+              <td style="color:var(--green);font-weight:900;font-size:1.1rem">${r.wins}</td>
+              <td style="color:var(--red);font-weight:900;font-size:1.1rem">${r.losses}</td>
+              <td ${colorDiff(r.winPct === '—' ? '—' : (parseFloat(r.winPct) >= 50 ? '1' : '-1'))}>${r.winPct}</td>
+              <td ${colorDiff(fmtDiff(r.diff))}>${fmtDiff(r.diff)}</td>
+              <td>${r.scored}</td>
+              <td>${r.against}</td>
+              <td>${r.last7WL}</td>
+              <td ${colorDiff(fmtDiff(r.last7Diff))}>${fmtDiff(r.last7Diff)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
 }
 
 function renderNemesis() {
