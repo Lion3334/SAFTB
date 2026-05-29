@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAFTB — Lifetime Leaderboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root {
+      --bg: #08080f;
+      --panel: #0d1844;
+      --border: #00c8ff;
+      --red: #e8273a;
+      --gold: #ffd700;
+      --cyan: #00d4ff;
+      --white: #f0f0ff;
+      --green: #39ff14;
+      --dim: #5a6a9a;
+      --team1: #ff6a00;
+      --team2: #00c8ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--white);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* CRT scanlines */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+
+    /* HEADER */
+    .site-header { text-align: center; padding: 40px 16px 24px; }
+
+    .site-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(1.6rem, 6vw, 3.2rem);
+      color: var(--red);
+      text-shadow: 3px 3px 0 #000, 0 0 20px rgba(232,39,58,0.8), 0 0 40px rgba(232,39,58,0.4);
+      letter-spacing: 4px;
+      margin-bottom: 14px;
+      line-height: 1.3;
+    }
+
+    .site-subtitle {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(0.4rem, 1.4vw, 0.65rem);
+      color: var(--cyan);
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(0,212,255,0.6);
+    }
+
+    .header-divider {
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--red), var(--cyan), transparent);
+      margin: 20px 0;
+      box-shadow: 0 0 10px rgba(0,200,255,0.5);
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 32px;
+      border: 2px solid var(--border);
+      border-radius: 2px;
+      padding: 4px;
+      background: rgba(13,24,68,0.5);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 8px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(0.4rem, 1.1vw, 0.6rem);
+      color: var(--dim);
+      background: transparent;
+      border: 2px solid transparent;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.1s;
+    }
+
+    .tab-btn:hover { color: var(--cyan); border-color: rgba(0,200,255,0.3); }
+    .tab-btn.active {
+      color: var(--bg);
+      background: var(--cyan);
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0,200,255,0.6);
+    }
+
+    /* HERO CARDS */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .hero-card {
+      background: var(--panel);
+      border: 2px solid var(--border);
+      padding: 16px 10px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0,200,255,0.2), inset 0 0 20px rgba(0,0,50,0.3);
+    }
+
+    .hero-val {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(1rem, 3.5vw, 1.8rem);
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(255,215,0,0.6);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .hero-lbl {
+      font-size: 0.7rem;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* SECTION HEADER */
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .section-head-text {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(0.45rem, 1.3vw, 0.65rem);
+      color: var(--gold);
+      white-space: nowrap;
+      text-shadow: 0 0 8px rgba(255,215,0,0.5);
+    }
+
+    .section-head-line {
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+
+    /* PLAYER CARDS */
+    .player-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .player-card {
+      background: linear-gradient(160deg, var(--panel) 0%, #0a1035 100%);
+      border: 3px solid var(--border);
+      box-shadow: 0 0 20px rgba(0,200,255,0.25), inset 0 0 30px rgba(0,0,50,0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .player-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--team1), var(--team2));
+    }
+
+    .player-card-header {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px 10px;
+      border-bottom: 2px solid rgba(0,200,255,0.3);
+      gap: 12px;
+    }
+
+    .player-rank {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.85rem;
+      color: var(--gold);
+      text-shadow: 0 0 8px rgba(255,215,0,0.7);
+      min-width: 28px;
+    }
+
+    .player-name {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+
+    .player-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 12px 16px;
+    }
+
+    .stat-item { padding: 5px 0; }
+
+    .stat-label {
+      font-size: 0.65rem;
+      color: var(--gold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .stat-value { font-size: 1.3rem; font-weight: 900; color: var(--cyan); }
+    .stat-value.pos { color: var(--green); }
+    .stat-value.neg { color: var(--red); }
+    .stat-value.neu { color: var(--dim); }
+
+    /* NEMESIS TABLE */
+    .nemesis-wrap {
+      overflow-x: auto;
+      margin-bottom: 40px;
+      border: 2px solid var(--border);
+      box-shadow: 0 0 15px rgba(0,200,255,0.2);
+    }
+
+    .nemesis-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+
+    .nemesis-table thead th {
+      background: var(--panel);
+      color: var(--gold);
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .nemesis-table tbody tr { border-bottom: 1px solid rgba(0,200,255,0.15); }
+    .nemesis-table tbody tr:hover { background: rgba(13,24,68,0.8); }
+    .nemesis-table tbody td { padding: 10px 14px; color: var(--white); }
+    .nemesis-table tbody td:first-child {
+      font-weight: 900;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+
+    /* FORMS */
+    .admin-section { margin-bottom: 40px; }
+
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 120px; }
+
+    .form-label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+
+    .form-input, .form-select {
+      background: var(--panel);
+      border: 2px solid rgba(0,200,255,0.4);
+      color: var(--white);
+      padding: 10px 12px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.1s;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 8px rgba(0,200,255,0.3);
+    }
+
+    .form-select option { background: #0d1844; }
+
+    .teams-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .vs-badge {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.75rem;
+      color: var(--dim);
+      padding-top: 44px;
+      text-align: center;
+    }
+
+    .team-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 2px;
+      padding: 8px 0;
+    }
+
+    .team-label.t1 { color: var(--team1); }
+    .team-label.t2 { color: var(--team2); }
+
+    /* BUTTONS */
+    .btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.5rem;
+      padding: 12px 16px;
+      border: 2px solid;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.1s;
+      white-space: nowrap;
+    }
+
+    .btn-primary { background: var(--panel); border-color: var(--cyan); color: var(--cyan); }
+    .btn-primary:hover { background: var(--cyan); color: var(--bg); box-shadow: 0 0 12px rgba(0,200,255,0.6); }
+
+    .btn-secondary { background: transparent; border-color: var(--gold); color: var(--gold); }
+    .btn-secondary:hover { background: var(--gold); color: var(--bg); }
+
+    .btn-danger { background: transparent; border-color: var(--red); color: var(--red); }
+    .btn-danger:hover { background: var(--red); color: var(--white); }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* GAME LIST */
+    .game-item { border: 1px solid rgba(0,200,255,0.2); margin-bottom: 8px; }
+
+    .game-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      cursor: pointer;
+      background: rgba(13,24,68,0.4);
+      gap: 8px;
+    }
+
+    .game-item-header:hover { background: rgba(13,24,68,0.8); }
+
+    .game-item-label { font-size: 0.95rem; font-weight: 800; color: var(--white); flex: 1; }
+    .game-toggle { color: var(--cyan); font-size: 0.8rem; flex-shrink: 0; }
+
+    .game-item-body { padding: 16px; border-top: 1px solid rgba(0,200,255,0.2); display: none; }
+    .game-item-body.open { display: block; }
+
+    /* PLAYERS LIST */
+    .players-list { color: var(--cyan); font-size: 1.1rem; margin-bottom: 16px; line-height: 1.8; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9998;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem;
+      padding: 14px 24px;
+      border: 2px solid;
+      letter-spacing: 1px;
+      text-align: center;
+      max-width: 90vw;
+      animation: slideDown 0.2s ease;
+    }
+
+    .toast.success { background: #0d300d; border-color: var(--green); color: var(--green); box-shadow: 0 0 20px rgba(57,255,20,0.3); }
+    .toast.error { background: #300d0d; border-color: var(--red); color: var(--red); box-shadow: 0 0 20px rgba(232,39,58,0.3); }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* MISC */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem;
+      color: var(--cyan);
+      letter-spacing: 3px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--dim);
+      font-size: 0.9rem;
+      border: 1px dashed rgba(0,200,255,0.2);
+    }
+
+    .confirm-box {
+      background: #200808;
+      border: 2px solid var(--red);
+      padding: 16px;
+      margin-top: 12px;
+      box-shadow: 0 0 20px rgba(232,39,58,0.3);
+    }
+
+    .confirm-box p {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.5rem;
+      color: var(--red);
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 600px) {
+      .teams-grid { grid-template-columns: 1fr; }
+      .vs-badge { padding-top: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <div class="site-title">🔥 SAFTB 🔥</div>
+    <div class="site-subtitle">LIFETIME LEADERBOARD</div>
+  </div>
+</header>
+
+<div class="header-divider"></div>
+
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('leaderboard')">🏆 LEADERBOARD</button>
+    <button class="tab-btn" onclick="switchTab('admin')">🔧 ADMIN</button>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div id="tab-leaderboard">
+    <div id="hero-cards" class="hero-grid">
+      <div class="hero-card"><span class="hero-val">—</span><span class="hero-lbl">GAMES PLAYED</span></div>
+      <div class="hero-card"><span class="hero-val">—</span><span class="hero-lbl">PLAYERS</span></div>
+      <div class="hero-card"><span class="hero-val">—</span><span class="hero-lbl">POINTS SCORED</span></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-head-text">📊 LIFETIME STATS</span>
+      <div class="section-head-line"></div>
+    </div>
+    <div id="player-grid" class="player-grid"><div class="loading">LOADING</div></div>
+
+    <div class="section-head">
+      <span class="section-head-text">⚔️ NEMESIS VIEW</span>
+      <div class="section-head-line"></div>
+    </div>
+    <div id="nemesis-wrap" class="nemesis-wrap"><div class="loading">LOADING</div></div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="tab-admin" style="display:none">
+
+    <div class="admin-section">
+      <div class="section-head">
+        <span class="section-head-text">➕ LOG A GAME</span>
+        <div class="section-head-line"></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="max-width:200px">
+          <label class="form-label">Date</label>
+          <input type="date" id="game-date" class="form-input">
+        </div>
+        <div class="form-group" style="max-width:120px">
+          <label class="form-label">Game #</label>
+          <input type="number" id="game-seq" class="form-input" min="1" value="1">
+        </div>
+      </div>
+
+      <div id="teams-grid" class="teams-grid">
+        <div>
+          <div class="team-label t1">TEAM 1</div>
+          <div class="form-group">
+            <label class="form-label">Player 1</label>
+            <select id="t1p1" class="form-select"></select>
+          </div>
+          <div class="form-group" style="margin-top:8px">
+            <label class="form-label">Player 2</label>
+            <select id="t1p2" class="form-select"></select>
+          </div>
+          <div class="form-group" style="margin-top:8px">
+            <label class="form-label">Score</label>
+            <input type="number" id="t1score" class="form-input" min="0" value="0">
+          </div>
+        </div>
+        <div class="vs-badge">VS</div>
+        <div>
+          <div class="team-label t2">TEAM 2</div>
+          <div class="form-group">
+            <label class="form-label">Player 1</label>
+            <select id="t2p1" class="form-select"></select>
+          </div>
+          <div class="form-group" style="margin-top:8px">
+            <label class="form-label">Player 2</label>
+            <select id="t2p2" class="form-select"></select>
+          </div>
+          <div class="form-group" style="margin-top:8px">
+            <label class="form-label">Score</label>
+            <input type="number" id="t2score" class="form-input" min="0" value="0">
+          </div>
+        </div>
+      </div>
+
+      <div id="players-warning" class="empty-state" style="display:none">
+        Add at least 4 players below before logging games.
+      </div>
+
+      <div class="btn-row" id="save-btns">
+        <button class="btn btn-primary" onclick="saveGame(false)">💾 SAVE GAME</button>
+        <button class="btn btn-secondary" onclick="saveGame(true)">💾+ SAVE &amp; NEXT</button>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <div class="section-head">
+        <span class="section-head-text">✏️ EDIT / DELETE GAMES</span>
+        <div class="section-head-line"></div>
+      </div>
+      <div id="game-list"><div class="loading">LOADING</div></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="section-head">
+        <span class="section-head-text">👥 MANAGE PLAYERS</span>
+        <div class="section-head-line"></div>
+      </div>
+      <div id="players-list" class="players-list">—</div>
+      <div class="form-row" style="max-width:400px">
+        <div class="form-group">
+          <label class="form-label">New Player Name</label>
+          <input type="text" id="new-player" class="form-input" placeholder="Enter name"
+                 onkeydown="if(event.key==='Enter') addPlayer()">
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn btn-primary" onclick="addPlayer()">ADD</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://fvirekkpybfwsirjynnp.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_koxsuf4WX2xu4IIdJ6DZDA_QLAjqiaR';
+const { createClient } = window.supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allPlayers = [];
+let allGames = [];
+
+// ── TABS ──
+function switchTab(tab) {
+  document.getElementById('tab-leaderboard').style.display = tab === 'leaderboard' ? '' : 'none';
+  document.getElementById('tab-admin').style.display = tab === 'admin' ? '' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', tab === (i === 0 ? 'leaderboard' : 'admin'));
+  });
+}
+
+// ── TOAST ──
+function showToast(msg, type = 'success') {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ── DATA ──
+async function fetchPlayers() {
+  const { data, error } = await db.from('players').select('*').order('name');
+  if (error) throw error;
+  return data;
+}
+
+async function fetchGames() {
+  const { data, error } = await db.from('games').select('*')
+    .order('game_date', { ascending: false })
+    .order('game_sequence', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+async function getNextSeq(dateStr) {
+  const { data } = await db.from('games').select('game_sequence')
+    .eq('game_date', dateStr)
+    .order('game_sequence', { ascending: false })
+    .limit(1);
+  return data && data.length ? data[0].game_sequence + 1 : 1;
+}
+
+// ── STATS (ported from stats.py) ──
+function computeLeaderboard(players, games) {
+  const pidName = Object.fromEntries(players.map(p => [p.id, p.name]));
+  const pg = Object.fromEntries(players.map(p => [p.id, []]));
+
+  for (const g of games) {
+    const s1 = g.team1_score, s2 = g.team2_score;
+    for (const id of [g.team1_player1_id, g.team1_player2_id]) {
+      if (!pg[id]) pg[id] = [];
+      pg[id].push({ scored: s1, against: s2, win: s1 > s2 ? 1 : 0, loss: s1 < s2 ? 1 : 0 });
+    }
+    for (const id of [g.team2_player1_id, g.team2_player2_id]) {
+      if (!pg[id]) pg[id] = [];
+      pg[id].push({ scored: s2, against: s1, win: s2 > s1 ? 1 : 0, loss: s2 < s1 ? 1 : 0 });
+    }
+  }
+
+  function agg(recs) {
+    return {
+      wins: recs.reduce((s, r) => s + r.win, 0),
+      losses: recs.reduce((s, r) => s + r.loss, 0),
+      scored: recs.reduce((s, r) => s + r.scored, 0),
+      against: recs.reduce((s, r) => s + r.against, 0),
+    };
+  }
+
+  return players.map(p => {
+    const records = pg[p.id] || [];
+    const life = agg(records);
+    const l7 = agg(records.slice(0, 7));
+    return {
+      name: pidName[p.id],
+      wins: life.wins, losses: life.losses,
+      scored: life.scored, against: life.against,
+      diff: life.scored - life.against,
+      last7WL: `${l7.wins}-${l7.losses}`,
+      last7Diff: l7.scored - l7.against,
+    };
+  }).sort((a, b) => b.wins - a.wins || b.diff - a.diff);
+}
+
+function computeNemesis(players, games) {
+  const pidName = Object.fromEntries(players.map(p => [p.id, p.name]));
+  const h2h = {};
+
+  function rec(a, b) {
+    if (!h2h[a]) h2h[a] = {};
+    if (!h2h[a][b]) h2h[a][b] = { wins: 0, losses: 0, diff: 0, games: 0 };
+    return h2h[a][b];
+  }
+
+  for (const g of games) {
+    const t1 = [g.team1_player1_id, g.team1_player2_id];
+    const t2 = [g.team2_player1_id, g.team2_player2_id];
+    const s1 = g.team1_score, s2 = g.team2_score;
+    for (const a of t1) for (const b of t2) {
+      const r = rec(a, b);
+      r.games++; r.diff += s1 - s2;
+      if (s1 > s2) r.wins++; else if (s1 < s2) r.losses++;
+      const r2 = rec(b, a);
+      r2.games++; r2.diff += s2 - s1;
+      if (s2 > s1) r2.wins++; else if (s2 < s1) r2.losses++;
+    }
+  }
+
+  function best(pid, key, desc) {
+    const opps = Object.entries(h2h[pid] || {}).filter(([, d]) => d.games > 0);
+    if (!opps.length) return '—';
+    opps.sort((a, b) => desc ? b[1][key] - a[1][key] : a[1][key] - b[1][key]);
+    const [oppId, data] = opps[0];
+    const val = data[key];
+    return `${pidName[oppId] || '?'} (${key === 'diff' && val > 0 ? '+' : ''}${val})`;
+  }
+
+  return players.map(p => ({
+    name: pidName[p.id],
+    mwa: best(p.id, 'wins', true),
+    mla: best(p.id, 'losses', true),
+    bda: best(p.id, 'diff', true),
+    wda: best(p.id, 'diff', false),
+  }));
+}
+
+// ── RENDER ──
+const RANKS = ['🥇', '🥈', '🥉'];
+
+function dc(val) {
+  return val > 0 ? 'pos' : val < 0 ? 'neg' : 'neu';
+}
+
+function renderHeroCards() {
+  const pts = allGames.reduce((s, g) => s + g.team1_score + g.team2_score, 0);
+  document.getElementById('hero-cards').innerHTML = `
+    <div class="hero-card"><span class="hero-val">${allGames.length}</span><span class="hero-lbl">GAMES PLAYED</span></div>
+    <div class="hero-card"><span class="hero-val">${allPlayers.length}</span><span class="hero-lbl">PLAYERS</span></div>
+    <div class="hero-card"><span class="hero-val">${pts.toLocaleString()}</span><span class="hero-lbl">POINTS SCORED</span></div>
+  `;
+}
+
+function renderLeaderboard() {
+  const rows = computeLeaderboard(allPlayers, allGames);
+  const el = document.getElementById('player-grid');
+  if (!rows.length) {
+    el.innerHTML = '<div class="empty-state">No players yet. Add players in the Admin tab.</div>';
+    return;
+  }
+  el.innerHTML = rows.map((r, i) => `
+    <div class="player-card">
+      <div class="player-card-header">
+        <span class="player-rank">${RANKS[i] || (i + 1)}</span>
+        <span class="player-name">${r.name}</span>
+      </div>
+      <div class="player-stats">
+        <div class="stat-item">
+          <div class="stat-label">WINS</div>
+          <div class="stat-value pos">${r.wins}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">LOSSES</div>
+          <div class="stat-value neg">${r.losses}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">PTS SCORED</div>
+          <div class="stat-value">${r.scored}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">PTS AGAINST</div>
+          <div class="stat-value">${r.against}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">POINT DIFF</div>
+          <div class="stat-value ${dc(r.diff)}">${r.diff > 0 ? '+' : ''}${r.diff}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">LAST 7</div>
+          <div class="stat-value">${r.last7WL}</div>
+        </div>
+        <div class="stat-item" style="grid-column:span 2">
+          <div class="stat-label">LAST 7 DIFF</div>
+          <div class="stat-value ${dc(r.last7Diff)}">${r.last7Diff > 0 ? '+' : ''}${r.last7Diff}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderNemesis() {
+  const rows = computeNemesis(allPlayers, allGames);
+  const el = document.getElementById('nemesis-wrap');
+  if (!rows.length) {
+    el.innerHTML = '<div class="empty-state">No data yet.</div>';
+    return;
+  }
+  el.innerHTML = `
+    <table class="nemesis-table">
+      <thead><tr>
+        <th>Player</th>
+        <th>Most Wins Against</th>
+        <th>Most Losses Against</th>
+        <th>Best Diff Against</th>
+        <th>Worst Diff Against</th>
+      </tr></thead>
+      <tbody>${rows.map(r => `
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.mwa}</td>
+          <td>${r.mla}</td>
+          <td>${r.bda}</td>
+          <td>${r.wda}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function selOpts(currentId) {
+  return allPlayers.map(p =>
+    `<option value="${p.id}"${p.id === currentId ? ' selected' : ''}>${p.name}</option>`
+  ).join('');
+}
+
+function renderPlayerSelects() {
+  const defaults = [0, 1, 2, 3];
+  ['t1p1', 't1p2', 't2p1', 't2p2'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    const prev = el.value;
+    el.innerHTML = allPlayers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    if (allPlayers.find(p => p.id === prev)) el.value = prev;
+    else if (allPlayers[defaults[i]]) el.value = allPlayers[defaults[i]].id;
+  });
+  const ok = allPlayers.length >= 4;
+  document.getElementById('players-warning').style.display = ok ? 'none' : '';
+  document.getElementById('save-btns').style.display = ok ? '' : 'none';
+  document.getElementById('teams-grid').style.display = ok ? '' : 'none';
+}
+
+function renderPlayersList() {
+  const el = document.getElementById('players-list');
+  el.textContent = allPlayers.length ? allPlayers.map(p => p.name).join('  ·  ') : 'No players yet.';
+}
+
+function renderGameList() {
+  const el = document.getElementById('game-list');
+  if (!allGames.length) {
+    el.innerHTML = '<div class="empty-state">No games recorded yet.</div>';
+    return;
+  }
+  const idName = Object.fromEntries(allPlayers.map(p => [p.id, p.name]));
+  el.innerHTML = allGames.map(g => {
+    const n = id => idName[id] || '?';
+    const s1 = g.team1_score, s2 = g.team2_score;
+    const w1 = s1 > s2 ? ' ✓' : '', w2 = s2 > s1 ? ' ✓' : '';
+    const label = `${g.game_date} · G${g.game_sequence}  |  ${n(g.team1_player1_id)} & ${n(g.team1_player2_id)}${w1}  ${s1}–${s2}  ${n(g.team2_player1_id)} & ${n(g.team2_player2_id)}${w2}`;
+    return `
+      <div class="game-item">
+        <div class="game-item-header" onclick="toggleGame('${g.id}')">
+          <span class="game-item-label">${label}</span>
+          <span class="game-toggle" id="tog-${g.id}">▼</span>
+        </div>
+        <div class="game-item-body" id="body-${g.id}">
+          <div class="form-row">
+            <div class="form-group" style="max-width:200px">
+              <label class="form-label">Date</label>
+              <input type="date" id="ed-${g.id}" class="form-input" value="${g.game_date}">
+            </div>
+            <div class="form-group" style="max-width:120px">
+              <label class="form-label">Game #</label>
+              <input type="number" id="es-${g.id}" class="form-input" min="1" value="${g.game_sequence}">
+            </div>
+          </div>
+          <div class="teams-grid">
+            <div>
+              <div class="team-label t1">TEAM 1</div>
+              <div class="form-group">
+                <label class="form-label">Player 1</label>
+                <select id="e1a-${g.id}" class="form-select">${selOpts(g.team1_player1_id)}</select>
+              </div>
+              <div class="form-group" style="margin-top:8px">
+                <label class="form-label">Player 2</label>
+                <select id="e1b-${g.id}" class="form-select">${selOpts(g.team1_player2_id)}</select>
+              </div>
+              <div class="form-group" style="margin-top:8px">
+                <label class="form-label">Score</label>
+                <input type="number" id="e1s-${g.id}" class="form-input" min="0" value="${s1}">
+              </div>
+            </div>
+            <div class="vs-badge">VS</div>
+            <div>
+              <div class="team-label t2">TEAM 2</div>
+              <div class="form-group">
+                <label class="form-label">Player 1</label>
+                <select id="e2a-${g.id}" class="form-select">${selOpts(g.team2_player1_id)}</select>
+              </div>
+              <div class="form-group" style="margin-top:8px">
+                <label class="form-label">Player 2</label>
+                <select id="e2b-${g.id}" class="form-select">${selOpts(g.team2_player2_id)}</select>
+              </div>
+              <div class="form-group" style="margin-top:8px">
+                <label class="form-label">Score</label>
+                <input type="number" id="e2s-${g.id}" class="form-input" min="0" value="${s2}">
+              </div>
+            </div>
+          </div>
+          <div class="btn-row" style="margin-top:12px">
+            <button class="btn btn-primary" onclick="updateGame('${g.id}')">💾 SAVE CHANGES</button>
+            <button class="btn btn-danger" onclick="confirmDelete('${g.id}')">🗑 DELETE</button>
+          </div>
+          <div id="conf-${g.id}" class="confirm-box" style="display:none">
+            <p>DELETE THIS GAME PERMANENTLY?</p>
+            <div class="btn-row">
+              <button class="btn btn-danger" onclick="deleteGame('${g.id}')">YES, DELETE</button>
+              <button class="btn btn-secondary" onclick="document.getElementById('conf-${g.id}').style.display='none'">CANCEL</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleGame(id) {
+  const body = document.getElementById(`body-${id}`);
+  const tog = document.getElementById(`tog-${id}`);
+  const open = body.classList.toggle('open');
+  tog.textContent = open ? '▲' : '▼';
+}
+
+function confirmDelete(id) {
+  document.getElementById(`conf-${id}`).style.display = '';
+}
+
+// ── VALIDATION ──
+function validateGame(a, b, c, d) {
+  if (new Set([a, b, c, d]).size < 4) return 'A player cannot appear on both teams or twice on the same team.';
+  return null;
+}
+
+// ── ACTIONS ──
+async function saveGame(andNext) {
+  const dateVal = document.getElementById('game-date').value;
+  if (!dateVal) { showToast('Select a date.', 'error'); return; }
+
+  const t1p1 = document.getElementById('t1p1').value;
+  const t1p2 = document.getElementById('t1p2').value;
+  const t2p1 = document.getElementById('t2p1').value;
+  const t2p2 = document.getElementById('t2p2').value;
+  const err = validateGame(t1p1, t1p2, t2p1, t2p2);
+  if (err) { showToast(err, 'error'); return; }
+
+  const { error } = await db.from('games').insert({
+    game_date: dateVal,
+    game_sequence: parseInt(document.getElementById('game-seq').value),
+    team1_player1_id: t1p1,
+    team1_player2_id: t1p2,
+    team2_player1_id: t2p1,
+    team2_player2_id: t2p2,
+    team1_score: parseInt(document.getElementById('t1score').value) || 0,
+    team2_score: parseInt(document.getElementById('t2score').value) || 0,
+  });
+
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast('BOOMSHAKALAKA! GAME SAVED!', 'success');
+
+  document.getElementById('t1score').value = 0;
+  document.getElementById('t2score').value = 0;
+  if (andNext) {
+    const next = await getNextSeq(dateVal);
+    document.getElementById('game-seq').value = next;
+  }
+  await reloadData();
+}
+
+async function updateGame(id) {
+  const t1p1 = document.getElementById(`e1a-${id}`).value;
+  const t1p2 = document.getElementById(`e1b-${id}`).value;
+  const t2p1 = document.getElementById(`e2a-${id}`).value;
+  const t2p2 = document.getElementById(`e2b-${id}`).value;
+  const err = validateGame(t1p1, t1p2, t2p1, t2p2);
+  if (err) { showToast(err, 'error'); return; }
+
+  const { error } = await db.from('games').update({
+    game_date: document.getElementById(`ed-${id}`).value,
+    game_sequence: parseInt(document.getElementById(`es-${id}`).value),
+    team1_player1_id: t1p1, team1_player2_id: t1p2,
+    team2_player1_id: t2p1, team2_player2_id: t2p2,
+    team1_score: parseInt(document.getElementById(`e1s-${id}`).value) || 0,
+    team2_score: parseInt(document.getElementById(`e2s-${id}`).value) || 0,
+  }).eq('id', id);
+
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast('UPDATED!', 'success');
+  await reloadData();
+}
+
+async function deleteGame(id) {
+  const { error } = await db.from('games').delete().eq('id', id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast('GAME DELETED.', 'success');
+  await reloadData();
+}
+
+async function addPlayer() {
+  const input = document.getElementById('new-player');
+  const name = input.value.trim();
+  if (!name) { showToast('Name cannot be blank.', 'error'); return; }
+  const { error } = await db.from('players').insert({ name });
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast(`${name} ADDED!`, 'success');
+  input.value = '';
+  await reloadData();
+}
+
+// ── INIT ──
+async function reloadData() {
+  [allPlayers, allGames] = await Promise.all([fetchPlayers(), fetchGames()]);
+  renderHeroCards();
+  renderLeaderboard();
+  renderNemesis();
+  renderPlayerSelects();
+  renderPlayersList();
+  renderGameList();
+}
+
+async function init() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('game-date').value = today;
+  document.getElementById('game-date').addEventListener('change', async e => {
+    document.getElementById('game-seq').value = await getNextSeq(e.target.value);
+  });
+  document.getElementById('game-seq').value = await getNextSeq(today);
+  await reloadData();
+}
+
+init();
+</script>
+</body>
+</html>
