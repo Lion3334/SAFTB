@@ -14,12 +14,10 @@
       --border: #c8a000;
       --red: #d93050;
       --gold: #f0c000;
-      --cyan: #ff7820;
+      --orange: #ff7820;
       --white: #f5eed0;
       --green: #3aaa68;
-      --dim: #7a6a40;
-      --team1: #ff7820;
-      --team2: #d93050;
+      --dim: #8a7a50;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,247 +28,173 @@
       color: var(--white);
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 700;
+      font-size: 16px;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* subtle CRT scanlines */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(0,0,0,0.04) 4px, rgba(0,0,0,0.04) 5px);
-      pointer-events: none;
-      z-index: 9999;
-    }
+    .container { max-width: 980px; margin: 0 auto; padding: 0 20px; }
 
-    .container { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+    /* ── HEADER ── */
+    .site-header { text-align: center; padding: 44px 16px 28px; }
 
-    /* HEADER */
-    .site-header { text-align: center; padding: 40px 16px 24px; }
-
+    /* Press Start 2P lives here and only here */
     .site-title {
       font-family: 'Press Start 2P', monospace;
-      font-size: clamp(1.6rem, 6vw, 3.2rem);
+      font-size: clamp(1.8rem, 6vw, 3.4rem);
       color: var(--gold);
-      text-shadow: 3px 3px 0 rgba(0,0,0,0.7);
-      letter-spacing: 4px;
-      margin-bottom: 14px;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.8);
+      margin-bottom: 16px;
       line-height: 1.3;
     }
 
     .site-subtitle {
-      font-family: 'Press Start 2P', monospace;
-      font-size: clamp(0.4rem, 1.4vw, 0.65rem);
-      color: var(--cyan);
-      letter-spacing: 3px;
-      text-shadow: none;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--orange);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
     }
 
     .header-divider {
       height: 3px;
-      background: linear-gradient(90deg, transparent, var(--gold), var(--cyan), var(--gold), transparent);
-      margin: 20px 0;
-      box-shadow: none;
+      background: linear-gradient(90deg, transparent, var(--gold), var(--orange), var(--gold), transparent);
+      margin: 24px 0;
     }
 
-    /* TABS */
+    /* ── TABS ── */
     .tabs {
       display: flex;
-      gap: 4px;
-      margin-bottom: 32px;
+      gap: 6px;
+      margin-bottom: 36px;
+      background: var(--panel);
       border: 2px solid var(--border);
-      border-radius: 2px;
-      padding: 4px;
-      background: rgba(30,22,8,0.6);
+      padding: 6px;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 12px 8px;
-      font-family: 'Press Start 2P', monospace;
-      font-size: clamp(0.4rem, 1.1vw, 0.6rem);
+      padding: 12px 16px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       color: var(--dim);
       background: transparent;
       border: 2px solid transparent;
       cursor: pointer;
-      letter-spacing: 1px;
-      transition: all 0.1s;
+      transition: all 0.15s;
     }
 
-    .tab-btn:hover { color: var(--gold); border-color: rgba(200,160,0,0.3); }
-    .tab-btn.active {
-      color: var(--bg);
-      background: var(--gold);
-      border-color: var(--gold);
-      box-shadow: none;
-    }
+    .tab-btn:hover { color: var(--gold); }
+    .tab-btn.active { background: var(--gold); border-color: var(--gold); color: var(--bg); }
 
-    /* HERO CARDS */
+    /* ── HERO CARDS ── */
     .hero-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
-      margin-bottom: 32px;
+      margin-bottom: 40px;
     }
 
     .hero-card {
       background: var(--panel);
       border: 2px solid var(--border);
-      padding: 16px 10px;
+      padding: 20px 12px;
       text-align: center;
-      box-shadow: inset 0 0 20px rgba(20,14,0,0.4);
     }
 
+    /* Hero numbers: big, pixel font is fine here — it's large enough to read */
     .hero-val {
       font-family: 'Press Start 2P', monospace;
-      font-size: clamp(1rem, 3.5vw, 1.8rem);
+      font-size: clamp(1.2rem, 3.5vw, 2rem);
       color: var(--gold);
-      text-shadow: none;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .hero-lbl {
-      font-size: 0.7rem;
-      color: var(--cyan);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--orange);
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 0.12em;
     }
 
-    /* SECTION HEADER */
+    /* ── SECTION HEADER ── */
     .section-head {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
+      gap: 14px;
+      margin-bottom: 16px;
     }
 
     .section-head-text {
-      font-family: 'Press Start 2P', monospace;
-      font-size: clamp(0.45rem, 1.3vw, 0.65rem);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-style: italic;
+      font-size: 1.25rem;
       color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
       white-space: nowrap;
-      text-shadow: none;
     }
 
     .section-head-line {
       flex: 1;
       height: 2px;
-      background: linear-gradient(90deg, var(--gold), transparent);
+      background: linear-gradient(90deg, var(--border), transparent);
     }
 
-    /* LEADERBOARD TABLE */
-    .player-grid { margin-bottom: 40px; }
+    /* ── TABLES (leaderboard + nemesis) ── */
+    .player-grid { margin-bottom: 44px; }
+    .nemesis-wrap { overflow-x: auto; margin-bottom: 44px; border: 2px solid var(--border); }
 
-    .player-card {
-      background: linear-gradient(160deg, var(--panel) 0%, #0a1035 100%);
-      border: 3px solid var(--border);
-      box-shadow: 0 0 20px rgba(0,200,255,0.25), inset 0 0 30px rgba(0,0,50,0.4);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .player-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--team1), var(--team2));
-    }
-
-    .player-card-header {
-      display: flex;
-      align-items: center;
-      padding: 14px 16px 10px;
-      border-bottom: 2px solid rgba(0,200,255,0.3);
-      gap: 12px;
-    }
-
-    .player-rank {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.85rem;
-      color: var(--gold);
-      text-shadow: 0 0 8px rgba(255,215,0,0.7);
-      min-width: 28px;
-    }
-
-    .player-name {
-      font-size: 1.6rem;
-      font-weight: 900;
-      color: var(--white);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      line-height: 1;
-    }
-
-    .player-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      padding: 12px 16px;
-    }
-
-    .stat-item { padding: 5px 0; }
-
-    .stat-label {
-      font-size: 0.65rem;
-      color: var(--gold);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    .stat-value { font-size: 1.3rem; font-weight: 900; color: var(--cyan); }
-    .stat-value.pos { color: var(--green); }
-    .stat-value.neg { color: var(--red); }
-    .stat-value.neu { color: var(--dim); }
-
-    /* NEMESIS TABLE */
-    .nemesis-wrap {
-      overflow-x: auto;
-      margin-bottom: 40px;
-      border: 2px solid var(--border);
-    }
-
-    .nemesis-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    .nemesis-table { width: 100%; border-collapse: collapse; }
 
     .nemesis-table thead th {
       background: var(--panel);
       color: var(--gold);
-      font-size: 0.6rem;
-      letter-spacing: 2px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 10px 14px;
+      padding: 12px 16px;
       text-align: left;
       border-bottom: 2px solid var(--border);
       white-space: nowrap;
     }
 
-    .nemesis-table thead th.sortable {
-      cursor: pointer;
-      user-select: none;
-    }
-
+    .nemesis-table thead th.sortable { cursor: pointer; user-select: none; }
     .nemesis-table thead th.sortable:hover { color: var(--white); }
-    .nemesis-table thead th.sort-active { color: var(--cyan); }
+    .nemesis-table thead th.sort-active { color: var(--orange); }
 
-    .nemesis-table tbody tr { border-bottom: 1px solid rgba(200,160,0,0.15); }
-    .nemesis-table tbody tr:hover { background: rgba(30,22,8,0.8); }
-    .nemesis-table tbody td { padding: 10px 14px; color: var(--white); }
-    .nemesis-table tbody td:first-child {
-      font-weight: 900;
-      font-size: 1.1rem;
-      text-transform: uppercase;
-      color: var(--cyan);
+    .nemesis-table tbody tr { border-bottom: 1px solid rgba(200,160,0,0.12); }
+    .nemesis-table tbody tr:hover { background: rgba(255,120,32,0.06); }
+
+    .nemesis-table tbody td {
+      padding: 12px 16px;
+      font-size: 1rem;
+      color: var(--white);
     }
 
-    /* FORMS */
-    .admin-section { margin-bottom: 40px; }
-
+    /* ── FORMS ── */
+    .admin-section { margin-bottom: 44px; }
     .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-
     .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 120px; }
 
-    .form-label { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+    .form-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
 
     .form-input, .form-select {
       background: var(--panel);
@@ -282,56 +206,58 @@
       font-weight: 700;
       width: 100%;
       outline: none;
-      transition: border-color 0.1s;
+      transition: border-color 0.15s;
     }
 
-    .form-input:focus, .form-select:focus {
-      border-color: var(--cyan);
-      box-shadow: none;
-    }
-
+    .form-input:focus, .form-select:focus { border-color: var(--orange); }
     .form-select option { background: #1e1a08; }
 
     .teams-grid {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
-      gap: 12px;
+      gap: 16px;
       align-items: start;
       margin-bottom: 16px;
     }
 
     .vs-badge {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.75rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 1.4rem;
       color: var(--dim);
       padding-top: 44px;
       text-align: center;
+      letter-spacing: 0.05em;
     }
 
     .team-label {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.55rem;
-      letter-spacing: 2px;
-      padding: 8px 0;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 0;
     }
 
-    .team-label.t1 { color: var(--team1); }
-    .team-label.t2 { color: var(--team2); }
+    .team-label.t1 { color: var(--orange); }
+    .team-label.t2 { color: var(--red); }
 
-    /* BUTTONS */
+    /* ── BUTTONS ── */
     .btn {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.5rem;
-      padding: 12px 16px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 18px;
       border: 2px solid;
       cursor: pointer;
-      letter-spacing: 1px;
-      transition: all 0.1s;
+      transition: all 0.15s;
       white-space: nowrap;
     }
 
-    .btn-primary { background: var(--panel); border-color: var(--cyan); color: var(--cyan); }
-    .btn-primary:hover { background: var(--cyan); color: var(--bg); }
+    .btn-primary { background: var(--panel); border-color: var(--orange); color: var(--orange); }
+    .btn-primary:hover { background: var(--orange); color: var(--bg); }
 
     .btn-secondary { background: transparent; border-color: var(--gold); color: var(--gold); }
     .btn-secondary:hover { background: var(--gold); color: var(--bg); }
@@ -341,87 +267,89 @@
 
     .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
-    /* GAME LIST */
+    /* ── GAME LIST ── */
     .game-item { border: 1px solid rgba(200,160,0,0.2); margin-bottom: 8px; }
 
     .game-item-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 14px;
+      padding: 11px 16px;
       cursor: pointer;
-      background: rgba(30,22,8,0.4);
+      background: rgba(30,22,8,0.5);
       gap: 8px;
     }
 
-    .game-item-header:hover { background: rgba(30,22,8,0.8); }
-
-    .game-item-label { font-size: 0.95rem; font-weight: 800; color: var(--white); flex: 1; }
-    .game-toggle { color: var(--cyan); font-size: 0.8rem; flex-shrink: 0; }
+    .game-item-header:hover { background: rgba(30,22,8,0.9); }
+    .game-item-label { font-size: 1rem; font-weight: 800; color: var(--white); flex: 1; }
+    .game-toggle { color: var(--gold); font-size: 0.85rem; flex-shrink: 0; }
 
     .game-item-body { padding: 16px; border-top: 1px solid rgba(200,160,0,0.2); display: none; }
     .game-item-body.open { display: block; }
 
-    /* PLAYERS LIST */
+    /* ── PLAYERS LIST ── */
     .players-list { margin-bottom: 16px; }
 
     .player-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid rgba(61,154,184,0.15);
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(200,160,0,0.12);
       gap: 12px;
     }
 
     .player-row-name {
-      color: var(--cyan);
+      color: var(--white);
       font-size: 1.1rem;
       font-weight: 800;
       text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
-    /* TOAST */
+    /* ── TOAST ── */
     .toast {
       position: fixed;
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 9998;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.55rem;
-      padding: 14px 24px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 14px 28px;
       border: 2px solid;
-      letter-spacing: 1px;
       text-align: center;
       max-width: 90vw;
       animation: slideDown 0.2s ease;
     }
 
-    .toast.success { background: #0d300d; border-color: var(--green); color: var(--green); box-shadow: 0 0 20px rgba(57,255,20,0.3); }
-    .toast.error { background: #300d0d; border-color: var(--red); color: var(--red); box-shadow: 0 0 20px rgba(232,39,58,0.3); }
+    .toast.success { background: #0d2a0d; border-color: var(--green); color: var(--green); }
+    .toast.error { background: #2a0d0d; border-color: var(--red); color: var(--red); }
 
     @keyframes slideDown {
       from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
       to   { opacity: 1; transform: translateX(-50%) translateY(0); }
     }
 
-    /* MISC */
+    /* ── MISC ── */
     .loading {
       text-align: center;
       padding: 60px 20px;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.55rem;
-      color: var(--cyan);
-      letter-spacing: 3px;
+      font-size: 1rem;
+      color: var(--dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
 
     .empty-state {
       text-align: center;
       padding: 40px;
       color: var(--dim);
-      font-size: 0.9rem;
-      border: 1px dashed rgba(0,200,255,0.2);
+      font-size: 1rem;
+      border: 1px dashed rgba(200,160,0,0.2);
     }
 
     .confirm-box {
@@ -459,11 +387,6 @@
 
 <div class="container">
 
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('leaderboard')">🏆 LEADERBOARD</button>
-    <button class="tab-btn" onclick="switchTab('admin')">🔧 ADMIN</button>
-  </div>
-
   <!-- LEADERBOARD -->
   <div id="tab-leaderboard">
     <div id="hero-cards" class="hero-grid">
@@ -483,10 +406,24 @@
       <div class="section-head-line"></div>
     </div>
     <div id="nemesis-wrap" class="nemesis-wrap"><div class="loading">LOADING</div></div>
+
+    <div style="text-align:center;padding:40px 0 20px">
+      <button onclick="switchTab('admin')"
+        style="background:none;border:none;color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;opacity:0.6">
+        🔧 Admin
+      </button>
+    </div>
   </div>
 
   <!-- ADMIN -->
   <div id="tab-admin" style="display:none">
+
+    <div style="margin-bottom:28px">
+      <button onclick="switchTab('leaderboard')"
+        style="background:none;border:none;color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:0.9rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
+        ← Back to Leaderboard
+      </button>
+    </div>
 
     <div class="admin-section">
       <div class="section-head">
