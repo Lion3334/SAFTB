@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --bg: #ffffff;
@@ -354,9 +355,45 @@
       .vs-badge { padding-top: 4px; }
     }
 
-    @media (max-width: 600px) {
-      .teams-grid { grid-template-columns: 1fr; }
-      .vs-badge { padding-top: 4px; }
+    /* ── CHART ── */
+    .chart-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .chart-toggle-btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 7px 16px;
+      border: 2px solid #d1d5db;
+      background: var(--white);
+      color: var(--dim);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chart-toggle-btn.active {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: var(--white);
+    }
+
+    .chart-toggle-btn:hover:not(.active) {
+      border-color: var(--navy);
+      color: var(--navy);
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 340px;
+      border: 2px solid #d1d5db;
+      padding: 16px 8px 8px;
+      margin-bottom: 36px;
+      background: var(--white);
     }
   </style>
 </head>
@@ -379,6 +416,18 @@
       <div class="hero-card"><span class="hero-val">—</span><span class="hero-lbl">GAMES PLAYED</span></div>
       <div class="hero-card"><span class="hero-val">—</span><span class="hero-lbl">PLAYERS</span></div>
       <div class="hero-card"><span class="hero-val">—</span><span class="hero-lbl">POINTS SCORED</span></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-head-text">📈 PERFORMANCE OVER TIME</span>
+      <div class="section-head-line"></div>
+    </div>
+    <div class="chart-controls">
+      <button class="chart-toggle-btn active" data-metric="wins" onclick="switchMetric('wins')">LIFETIME WINS</button>
+      <button class="chart-toggle-btn" data-metric="scored" onclick="switchMetric('scored')">POINTS SCORED</button>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="perf-chart"></canvas>
     </div>
 
     <div class="section-head">
@@ -512,6 +561,13 @@ let allGames = [];
 let sortCol = 'wins';
 let sortDir = 1; // 1 = descending (highest first), -1 = ascending
 
+const CHART_COLORS = [
+  '#c8102e', '#002d72', '#1a7a40', '#d97706',
+  '#7c3aed', '#0891b2', '#be185d', '#374151',
+];
+let chartInstance = null;
+let chartMetric = 'wins';
+
 // ── TABS ──
 function switchTab(tab) {
   document.getElementById('tab-leaderboard').style.display = tab === 'leaderboard' ? '' : 'none';
@@ -638,6 +694,119 @@ function computeNemesis(players, games) {
     bda: best(p.id, 'diff', true),
     wda: best(p.id, 'diff', false),
   }));
+}
+
+// ── CHART ──
+function buildChartData(metric) {
+  // allGames is DESC; reverse for chronological order
+  const chronoGames = [...allGames].reverse();
+  const labels = chronoGames.map((_, i) => `G${i + 1}`);
+
+  const cumulative = Object.fromEntries(allPlayers.map(p => [p.id, 0]));
+  const series = Object.fromEntries(allPlayers.map(p => [p.id, []]));
+
+  for (const g of chronoGames) {
+    const t1 = [g.team1_player1_id, g.team1_player2_id];
+    const t2 = [g.team2_player1_id, g.team2_player2_id];
+    const playing = new Set([...t1, ...t2]);
+    for (const p of allPlayers) {
+      if (playing.has(p.id)) {
+        const onT1 = t1.includes(p.id);
+        if (metric === 'wins') {
+          const won = onT1 ? g.team1_score > g.team2_score : g.team2_score > g.team1_score;
+          cumulative[p.id] += won ? 1 : 0;
+        } else {
+          cumulative[p.id] += onT1 ? g.team1_score : g.team2_score;
+        }
+        series[p.id].push(cumulative[p.id]);
+      } else {
+        series[p.id].push(null);
+      }
+    }
+  }
+
+  return {
+    labels,
+    datasets: allPlayers.map((p, i) => ({
+      label: p.name.toUpperCase(),
+      data: series[p.id],
+      borderColor: CHART_COLORS[i % CHART_COLORS.length],
+      backgroundColor: 'transparent',
+      borderWidth: 2.5,
+      pointRadius: 3,
+      pointHoverRadius: 6,
+      tension: 0.3,
+      spanGaps: true,
+    })),
+  };
+}
+
+function renderChart() {
+  const canvas = document.getElementById('perf-chart');
+  if (!canvas) return;
+  const data = buildChartData(chartMetric);
+
+  if (chartInstance) {
+    chartInstance.data = data;
+    chartInstance.update();
+    return;
+  }
+
+  chartInstance = new Chart(canvas, {
+    type: 'line',
+    data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            font: { family: "'Barlow Condensed'", weight: '700', size: 13 },
+            color: '#1a1a2e',
+            padding: 18,
+            boxWidth: 22,
+          },
+        },
+        tooltip: {
+          backgroundColor: '#002d72',
+          titleFont: { family: "'Barlow Condensed'", weight: '700', size: 13 },
+          bodyFont: { family: "'Barlow Condensed'", weight: '700', size: 13 },
+          titleColor: '#ffffff',
+          bodyColor: '#ffffff',
+          padding: 10,
+          filter: item => item.raw !== null,
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: '#e5e7eb' },
+          ticks: { font: { family: "'Barlow Condensed'", weight: '700', size: 12 }, color: '#6b7280' },
+        },
+        y: {
+          grid: { color: '#e5e7eb' },
+          beginAtZero: true,
+          ticks: {
+            font: { family: "'Barlow Condensed'", weight: '700', size: 12 },
+            color: '#6b7280',
+            stepSize: 1,
+            precision: 0,
+          },
+        },
+      },
+    },
+  });
+}
+
+function switchMetric(metric) {
+  chartMetric = metric;
+  document.querySelectorAll('.chart-toggle-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.metric === metric);
+  });
+  if (chartInstance) {
+    chartInstance.data = buildChartData(metric);
+    chartInstance.update();
+  }
 }
 
 // ── RENDER ──
@@ -991,6 +1160,7 @@ async function deletePlayer(id, name) {
 async function reloadData() {
   [allPlayers, allGames] = await Promise.all([fetchPlayers(), fetchGames()]);
   renderHeroCards();
+  renderChart();
   renderLeaderboard();
   renderNemesis();
   renderPlayerSelects();
