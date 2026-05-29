@@ -9,23 +9,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     :root {
-      --bg: #08080f;
-      --panel: #0d1844;
-      --border: #00c8ff;
-      --red: #e8273a;
-      --gold: #ffd700;
-      --cyan: #00d4ff;
-      --white: #f0f0ff;
-      --green: #39ff14;
-      --dim: #5a6a9a;
-      --team1: #ff6a00;
-      --team2: #00c8ff;
+      --bg: #0b1a2e;
+      --panel: #152340;
+      --border: #3d9ab8;
+      --red: #cc3f50;
+      --gold: #c9a03a;
+      --cyan: #4db8d0;
+      --white: #d8e8f4;
+      --green: #3aaa68;
+      --dim: #6b82a8;
+      --team1: #d46b20;
+      --team2: #3d9ab8;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background-color: var(--bg);
+      background: linear-gradient(170deg, #0e2040 0%, #0b1a2e 45%, #0d1f38 100%);
+      background-attachment: fixed;
       color: var(--white);
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 700;
@@ -33,12 +34,12 @@
       overflow-x: hidden;
     }
 
-    /* CRT scanlines */
+    /* subtle CRT scanlines */
     body::after {
       content: '';
       position: fixed;
       inset: 0;
-      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
+      background: repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(0,0,0,0.04) 4px, rgba(0,0,0,0.04) 5px);
       pointer-events: none;
       z-index: 9999;
     }
@@ -52,7 +53,7 @@
       font-family: 'Press Start 2P', monospace;
       font-size: clamp(1.6rem, 6vw, 3.2rem);
       color: var(--red);
-      text-shadow: 3px 3px 0 #000, 0 0 20px rgba(232,39,58,0.8), 0 0 40px rgba(232,39,58,0.4);
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.6), 0 0 16px rgba(204,63,80,0.5);
       letter-spacing: 4px;
       margin-bottom: 14px;
       line-height: 1.3;
