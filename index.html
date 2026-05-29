@@ -64,7 +64,7 @@
       font-size: clamp(0.4rem, 1.4vw, 0.65rem);
       color: var(--cyan);
       letter-spacing: 3px;
-      text-shadow: 0 0 10px rgba(0,212,255,0.6);
+      text-shadow: none;
     }
 
     .header-divider {
@@ -126,7 +126,7 @@
       font-family: 'Press Start 2P', monospace;
       font-size: clamp(1rem, 3.5vw, 1.8rem);
       color: var(--gold);
-      text-shadow: 0 0 10px rgba(255,215,0,0.6);
+      text-shadow: none;
       display: block;
       margin-bottom: 8px;
     }
@@ -361,7 +361,23 @@
     .game-item-body.open { display: block; }
 
     /* PLAYERS LIST */
-    .players-list { color: var(--cyan); font-size: 1.1rem; margin-bottom: 16px; line-height: 1.8; }
+    .players-list { margin-bottom: 16px; }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(61,154,184,0.15);
+      gap: 12px;
+    }
+
+    .player-row-name {
+      color: var(--cyan);
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
 
     /* TOAST */
     .toast {
@@ -809,7 +825,16 @@ function renderPlayerSelects() {
 
 function renderPlayersList() {
   const el = document.getElementById('players-list');
-  el.textContent = allPlayers.length ? allPlayers.map(p => p.name).join('  ·  ') : 'No players yet.';
+  if (!allPlayers.length) {
+    el.innerHTML = '<div class="empty-state">No players yet.</div>';
+    return;
+  }
+  el.innerHTML = allPlayers.map(p => `
+    <div class="player-row">
+      <span class="player-row-name">${p.name}</span>
+      <button class="btn btn-danger" style="font-size:0.45rem;padding:6px 10px" onclick="deletePlayer('${p.id}','${p.name}')">🗑 REMOVE</button>
+    </div>
+  `).join('');
 }
 
 function renderGameList() {
@@ -979,6 +1004,17 @@ async function addPlayer() {
   if (error) { showToast('Error: ' + error.message, 'error'); return; }
   showToast(`${name} ADDED!`, 'success');
   input.value = '';
+  await reloadData();
+}
+
+async function deletePlayer(id, name) {
+  if (!confirm(`Remove ${name}? This will fail if they have games recorded.`)) return;
+  const { error } = await db.from('players').delete().eq('id', id);
+  if (error) {
+    showToast('Cannot delete — player has games recorded.', 'error');
+    return;
+  }
+  showToast(`${name} REMOVED.`, 'success');
   await reloadData();
 }
 
