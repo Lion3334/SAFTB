@@ -684,7 +684,7 @@ function computeNemesis(players, games) {
     opps.sort((a, b) => desc ? b[1][key] - a[1][key] : a[1][key] - b[1][key]);
     const [oppId, data] = opps[0];
     const val = data[key];
-    return `${pidName[oppId] || '?'} (${key === 'diff' && val > 0 ? '+' : ''}${val})`;
+    return `${(pidName[oppId] || '?').toUpperCase()} (${key === 'diff' && val > 0 ? '+' : ''}${val})`;
   }
 
   return players.map(p => ({
